@@ -299,3 +299,18 @@ Repository: https://github.com/AnikARD-ACH/MonthlyMCounter-MMC
 Backend dashboard: https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix
 Original local folder: D:\MonthlyMCounter-MMC
 Documentation prepared for MMC v1.0, November 2026. Update this README whenever code, deployment, Supabase configuration, or monthly-history behavior changes.
+
+
+What's included?
+The document covers the complete project lifecycle: the original idea, design decisions, monthly counter rules, permanent history, Supabase database structure, SQL functions, security permissions, testing results, water animations, GitHub Pages deployment, troubleshooting, maintenance, and long-term data preservation.
+
+It also includes a Quick Access directory with 15 useful links, including your live counter, History page, GitHub repository, GitHub login, Supabase dashboard, SQL Editor, Authentication settings, API keys, and local development addresses.
+Add it to GitHub
+Download the file and place it in:
+
+D:\MonthlyMCounter-MMC\README.md
+
+Then run these commands in your VS Code PowerShell terminal:
+git add README.md
+git commit -m "Add complete A-Z project documentation"
+git push origin main
