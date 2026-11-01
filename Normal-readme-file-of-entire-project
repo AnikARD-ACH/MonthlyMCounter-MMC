@@ -1,0 +1,301 @@
+Monthly Mutt Counter (MMC)
+A personal, online, month-by-month “mutth” counter with one-way increments, automatic calendar-month rollover, and a permanent read-only history view.
+Project status: Version 1.0 is deployed and usable (November 2026). Password login, online incrementing, refresh persistence, and history-page navigation were tested. The first real calendar-month rollover has not yet occurred or been end-to-end verified.
+
+1. Project idea and purpose
+Monthly Mutt Counter is a small, private-in-use personal tracker for counting occurrences of “mutth” (the project's chosen term). The owner opens the website, signs in with an email and password, and presses +1 Increase each time an occurrence should be recorded. The number shown is the count for the current calendar month, not the lifetime total.
+
+The design intentionally does not offer a minus-one or reset button: ordinary website users should not be able to reduce their count or rewrite previous months. When a new month begins in the Asia/Dhaka timezone, the main counter shows 0 until that month's first increment. Previous months retain their own database totals and appear on the History page after completion.
+
+This is a simple personal logging tool, not a medical tool, diagnosis, or recommendation about how often someone should engage in any behavior.
+Core requirements
+- One clear, large current-month number.
+- A single +1 Increase control; no decrease or manual reset control in the published site.
+- Normal email-and-password sign-in for everyday use.
+- All counts saved online in Supabase PostgreSQL, not in browser localStorage.
+- Rollover on actual calendar-month boundaries, including 28/29/30/31-day months and year changes.
+- History shows completed months only, with totals displayed read-only.
+- Store a small amount of data over many years: approximately 12 rows per year per user with recorded activity, or 240 monthly rows over 20 years if each month has a row.
+- Same dark navy design and looping water-ring, droplet, and bubble animations across pages.
+- Develop and test locally in VS Code before pushing updates to GitHub.
+2. Quick access: all important links
+Resource	Link / address	Why it matters
+Live website (counter/login)	https://anikard-ach.github.io/MonthlyMCounter-MMC/	Use the counter online
+Live monthly history	https://anikard-ach.github.io/MonthlyMCounter-MMC/history.html	View completed months
+GitHub repository	https://github.com/AnikARD-ACH/MonthlyMCounter-MMC	Source code and README
+GitHub login	https://github.com/login	Sign in to manage the repository
+GitHub Pages settings	https://github.com/AnikARD-ACH/MonthlyMCounter-MMC/settings/pages	Hosting configuration
+GitHub Actions	https://github.com/AnikARD-ACH/MonthlyMCounter-MMC/actions	Check deployment builds and failures
+GitHub commits	https://github.com/AnikARD-ACH/MonthlyMCounter-MMC/commits/main/	Source-change history
+Supabase login/dashboard	https://supabase.com/dashboard	Access cloud backend
+Supabase project dashboard	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix	Monthly-Mutt-Counter project
+Supabase SQL Editor	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix/sql/new	Inspect or run SQL with care
+Supabase Table Editor	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix/editor	Inspect public.monthly_counts
+Supabase Authentication users	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix/auth/users	View account records
+Supabase Auth URL configuration	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix/auth/url-configuration	Site URL and allowed redirects
+Supabase API key settings	https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix/settings/api-keys	Publishable/secret key management
+Local counter (Live Server)	http://127.0.0.1:5500/index.html	Testing on the development PC only
+Local history	http://127.0.0.1:5500/history.html	Local history testing
+
+
+Local project folder on the original PC: D:\MonthlyMCounter-MMC
+
+Git remote: https://github.com/AnikARD-ACH/MonthlyMCounter-MMC.git
+
+Supabase project URL (for the browser client): https://nfcwkpvfbqzwmhutozix.supabase.co (do not append /rest/v1/ in config.js).
+The GitHub Pages address is a free github.io project URL. The custom-domain field is intentionally left blank; no .com domain has been purchased or configured. Website links and project-dashboard paths are recorded from the setup; dashboards may change their navigation over time.
+
+3. How to use the website
+1. Open the live counter link above.
+2. Sign in with the email and password configured in Supabase Authentication. The password is not included in this repository.
+3. Check the displayed month and count.
+4. Click +1 Increase to record exactly one occurrence. Wait for Saved online.
+5. Refresh or reopen the website: the same current-month total should load from Supabase.
+6. Click View Monthly History to see finished months; use Back to Counter to return.
+7. Sign Out when desired.
+The History page will say “Your first month is still in progress” until at least one month with a saved record has finished. This is expected during the first month.
+4. Monthly lifecycle: what “reset” actually means
+This project does not erase the old number when a month changes. Instead, every account/month pair has its own row in the database.
+
+Example (illustrative counts, not real records):
+Date	Counter screen	History screen
+November 30, 2026	November = 26	November not yet listed
+December 1, 2026	December = 0	November 2026 = 26
+December 18, 2026	December = 7	November 2026 = 26
+January 1, 2027	January = 0	December 2026 = 7; November 2026 = 26
+
+
+The backend computes the active month using PostgreSQL's current time in Asia/Dhaka, rather than trusting the visitor's computer clock or counting 30 days since the last reset. The front end reloads the current month's record when entering the app, when the tab becomes visible, after increments, and periodically (about once per minute).
+
+Locking scope: The ordinary website's increment function targets the current month only; it provides no argument for choosing a past month. Standard signed-in users can read their rows but cannot directly update or delete them through the exposed table API. A project administrator with privileged database access can alter database records. Therefore, “locked” means locked through the normal app/user permissions, not cryptographically immutable.
+
+No midnight background job is required. When the calendar changes, the UI displays the new month's missing row as zero; the first +1 creates that month's row. The previous month's row remains unchanged.
+5. Technology and architecture
+Layer	Technology	Responsibility
+User interface	HTML5	Login, counter, history pages
+Design	CSS3	Dark responsive card layout, buttons, water effects
+Browser logic	Vanilla JavaScript	Authentication, database calls, display updates
+Authentication	Supabase Auth	Email/password login and authenticated sessions
+Database	Supabase PostgreSQL	Durable monthly totals
+Data access	Supabase JavaScript client v2	Read rows, call secured SQL functions
+Code hosting	GitHub	Source control and revisions
+Website hosting	GitHub Pages	Publicly reachable static site via HTTPS
+Local editor	Visual Studio Code	Development on Windows D: drive
+Local preview	VS Code Live Server	Browser preview on port 5500
+Version control	Git	Commit, branch, push workflow
+
+
+Request flow:
+Browser (GitHub Pages / localhost)
+    |
+    | Email + password login
+    v
+Supabase Auth ---> authenticated session
+    |
+    | Read: get_current_month() + monthly_counts SELECT
+    | Write: increment_monthly_count() RPC
+    v
+Supabase PostgreSQL (public.monthly_counts)
+    |
+    +--> Current-month count on index.html
+    +--> Completed-month totals on history.html
+GitHub stores website source code, not the live counter database. Supabase stores the actual monthly totals. Changing devices or browsers does not change which online data is used, provided the same Supabase account signs in.
+6. Repository and file structure
+MonthlyMCounter-MMC/
+├── .gitignore             # Exclusions for local/admin files
+├── config.js              # Public Supabase project URL and publishable key
+├── index.html             # Main login and current-month counter
+├── script.js              # Login, increment, fetch, refresh, sign-out
+├── history.html           # Read-only history page and Back link
+├── history.js             # Fetch, order, and render completed months
+├── style.css              # Shared site and history UI styling
+├── water-effects.css      # Shared animations and visual styles
+├── water-effects.js       # Generates animated droplets and bubbles
+├── schema.sql             # Reference SQL for database setup/functions
+└── admin-setup/           # Local-only account-administration utility
+    └── set-password.mjs   # IGNORED by Git; not published
+Key files:
+- index.html loads style.css, water-effects.css, Supabase JS, config.js, script.js, and water-effects.js. It contains the login and counter sections and the History link.
+- history.html loads the same visual assets, plus history.js, to keep the appearance identical across pages.
+- script.js calls signInWithPassword(), get_current_month(), and increment_monthly_count(), and fetches the current month's total.
+- history.js fetches the saved month rows and renders only months earlier than the server's current month, newest first. Unrecorded intermediate months after the first saved record are displayed as zero.
+- water-effects.css / .js are shared so one animation update affects both pages.
+- schema.sql is a reproducible reference to the intended structure, not a database backup. The production database is the actual source of truth.
+Important behavior of first-month zeroes
+The original history.js infers the tracking start from the earliest existing monthly database row. A month with no increment has no row. Consequently, if the user never increments in the first month, that zero month may not appear in History; zero months between the first saved month and the current month are shown. For guaranteed zero-month history from a fixed registration/start date, a future version should store an explicit start month. Do not claim that every zero month is already materialized in PostgreSQL.
+7. Supabase configuration and database
+Supabase organization: MMC-Workspace
+Project name: Monthly-Mutt-Counter
+Project reference: nfcwkpvfbqzwmhutozix
+Database type: PostgreSQL
+Calendar timezone for counting: Asia/Dhaka
+Main table: public.monthly_counts
+Column	Type	Meaning
+user_id	UUID	Supabase Auth user ID; references auth.users(id)
+month_start	DATE	First day of a calendar month (YYYY-MM-01)
+total	BIGINT	Nonnegative count for that user/month
+
+
+Primary key: (user_id, month_start) ensures one row per month per user. A check constraint requires month_start to be the month's first day and total >= 0.
+
+Example row (illustrative):
+user_id:     <authenticated-user-uuid>
+month_start: 2026-11-01
+total:       26
+Functions
+public.get_current_month() returns the beginning of the current month using the Asia/Dhaka timezone. The website uses it rather than calculating month boundaries from the computer's clock.
+
+public.increment_monthly_count():
+1. Reads the currently authenticated user ID from auth.uid().
+2. Rejects calls without an authenticated user.
+3. Gets the current month from the database clock in Asia/Dhaka.
+4. Inserts the month's row with total = 1 if missing.
+5. Otherwise performs an atomic total = total + 1 update for that row.
+6. Returns the updated month and total to the browser.
+The corrected conflict clause is:
+ON CONFLICT ON CONSTRAINT monthly_counts_pkey
+DO UPDATE SET total = mc.total + 1
+This matters: an earlier version using ON CONFLICT (user_id, month_start) failed with PostgreSQL error 42702: column reference "month_start" is ambiguous in the PL/pgSQL function because month_start is also an output-column name. The corrected function was installed and successfully tested.
+Access rules
+- Row Level Security (RLS) is enabled for monthly_counts.
+- Authenticated users may SELECT only their own rows using an auth.uid() policy.
+- Ordinary direct INSERT, UPDATE, and DELETE table privileges are revoked.
+- The authenticated role can execute the controlled increment_monthly_count() function.
+- Database administrators and project owners retain privileged controls, so protect the Supabase dashboard account.
+The implementation resides in the live database and is documented in schema.sql; do not casually re-run older saved SQL snippets that may contain the previous broken function.
+Authentication and redirect URLs
+Site URL (production):
+https://anikard-ach.github.io/MonthlyMCounter-MMC/
+Allowed redirect URLs:
+http://127.0.0.1:5500/**
+https://anikard-ach.github.io/MonthlyMCounter-MMC/**
+Ordinary sign-in uses email + password. Magic links were used during initial setup, but are not needed for everyday logins. Recovering an account may still require an email or an administrative procedure.
+
+Never place a Supabase sb_secret_ key, service-role key, database password, or login password in this public repository. config.js must contain only the intended public project URL and publishable client key. During setup, an administrative secret appeared in a screenshot; rotating that credential is recommended if it remains active.
+8. Local development from A to Z
+Prerequisites
+- Windows computer with VS Code.
+- Git installed and configured.
+- VS Code Live Server extension (or another static development server).
+- An internet connection to Supabase for login and data access.
+- Node.js is optional for the website itself; Node v24.18.0 was used during one-time administration.
+Original local workspace
+cd D:\MonthlyMCounter-MMC
+code .
+In VS Code, launch Live Server for index.html; the original development address is:
+http://127.0.0.1:5500/index.html
+Open the History page locally at:
+http://127.0.0.1:5500/history.html
+If using another PC, clone the repository:
+git clone https://github.com/AnikARD-ACH/MonthlyMCounter-MMC.git
+cd MonthlyMCounter-MMC
+code .
+The admin-setup folder is not included in a clone because .gitignore excludes it.
+Daily development discipline
+1. Edit locally in VS Code.
+2. Save and test locally: page appearance, login, +1 (only if you intend a real count), history, and errors in browser DevTools.
+3. Commit verified changes.
+4. Push to GitHub's main branch.
+5. Check GitHub Actions/Pages and retest the live website.
+Important: Both local and live versions point to the same production Supabase database. A +1 clicked during local testing also increments the real count. For visual testing, avoid +1 or use an isolated test account/project if needed.
+9. Publishing updates through GitHub
+Repository: https://github.com/AnikARD-ACH/MonthlyMCounter-MMC
+Remote: origin → https://github.com/AnikARD-ACH/MonthlyMCounter-MMC.git
+Deployment branch: main
+GitHub Pages source: Deploy from a branch → main → /(root)
+
+Routine commands from the project directory:
+git status
+git add .
+git commit -m "Describe the change"
+git push origin main
+GitHub Pages deploys the static files from that branch. If a deployment fails, see GitHub → Actions and Settings → Pages. The site requires no paid custom domain or application server.
+
+The repository was changed from Private to Public to enable free GitHub Pages publishing. This also means the repository files are publicly readable; admin-setup/ and other ignored private files must not be pushed.
+Adding or updating this documentation
+Save this document as README.md in the project root, then run:
+git add README.md
+git commit -m "Add complete project documentation"
+git push origin main
+GitHub will display it automatically on the repository home page.
+10. Testing and verification record
+Test/checkpoint	Outcome	What it establishes
+Local login using email + password	Passed	Existing Supabase account can sign in normally
+Main counter +1	Passed after SQL fix	Controlled RPC increments the count
+Browser refresh after +1	Passed	Count persists online
+Local and live site show same count	Passed	Both query the same Supabase backend
+Shared water animation, login and counter	Passed	Animated styling works after moving code to shared files
+History page and navigation	Passed	History page loads and returns to counter
+First tracking month hidden in History	Passed	Current incomplete month is not displayed
+Calendar-boundary SQL examples	Passed	Nov→Dec, Dec→Jan, normal Feb, leap-year Feb recognized
+Randomized example totals	Passed as simulation	Illustrative previous totals vary, and hypothetical new count is 0
+Read-only table permission check	Reported as completed	Authenticated table privileges reviewed; should show only SELECT
+Installed increment function definition	Passed	Uses auth.uid(), Asia/Dhaka, and corrected upsert
+Git push and GitHub Pages publishing	Passed	Site online on GitHub Pages
+Clean start for real tracking	Passed	November 2026 test record (total 11) deleted; app showed 0
+Actual end-to-end month boundary	Not yet tested	Must confirm active month flips and previous record appears in History after real boundary
+20-year durability	Not provable today	Requires maintaining service and backups over time
+
+
+Important testing caveat: The SQL query showing PASS with randomly generated numbers was a read-only calendar demonstration, not a database transaction that simulated a real clock change or proved archival. The practical backend design is month-keyed and does not rely on a destructive “reset.”
+First real rollover acceptance test
+When the first actual calendar transition occurs:
+1. Record November's final displayed count before midnight in Asia/Dhaka.
+2. On or after December 1, 2026, open/refresh the counter and confirm December 2026 = 0 before any December increment.
+3. Open History and confirm November 2026 appears with exactly its previous final value.
+4. Perform a legitimate December +1 if an occurrence actually happens; confirm November does not change.
+5. Verify the same result on both local and live site, if convenient.
+Do not manufacture real activity just to test the counter. If full automated testing is needed later, use a separate test project or test database with a controllable clock.
+11. Operations, persistence, and 20-year plan
+The stored information is tiny: around 240 month identifiers plus totals for 20 years per user, if every month is represented. Storage volume is not the main long-term risk. The main risks are loss of account access, project deletion, provider-plan changes, inactivity policies, and lack of backups.
+- Keep the Supabase project and its login recoverable.
+- Sign in periodically; check any Supabase free-plan inactivity policies applicable at that time.
+- Export data periodically and store copies outside Supabase. An example read-only query:
+SELECT user_id, month_start, total
+FROM public.monthly_counts
+ORDER BY user_id, month_start;
+- Use the Supabase SQL Editor or Table Editor export options for a CSV/backup where available. Do not commit exported personal tracking records to the public GitHub repository.
+- Preserve schema.sql to rebuild structure, but remember it does not include the actual data.
+- Before changing SQL functions or permissions, record a backup and test on a separate project where possible.
+- If switching to a new Supabase project, update the public URL/key in config.js, configure Auth/RLS, and migrate actual rows separately; creating tables alone will not recover history.
+- If GitHub Pages changes, the static website can be hosted on another static host; Supabase data is independent of GitHub Pages.
+Practical limitations of v1.0
+- Zero-only starting month: History begins at the earliest saved row, not at a guaranteed account-creation month. A first month that stays at zero may be omitted.
+- No physical archive job: Past months are retained as keyed rows, not moved into a separate archive table. That is sufficient for this design.
+- No date-selection control: The app cannot backdate missed entries or edit old totals through normal UI.
+- No manual reset: A privileged database administrator could still change or delete records outside the user interface.
+- No guaranteed perpetual free hosting/storage: Hosting and database free tiers may change; see current provider terms.
+- Public web source: The GitHub repository and Pages files are public. Account-specific data stays behind Supabase authentication/RLS in normal operation.
+12. Common troubleshooting
+Symptom	Likely issue / first check
+Live website shows 404	Check repository Settings → Pages and Actions; confirm branch main, folder /(root), and index.html exists
+Site loads but animations are missing	Confirm water-effects.css, water-effects.js, #bubbleField, and #waterSplash are included; inspect browser DevTools
+Login says “Invalid login credentials”	Confirm existing Supabase account and password; check Auth users/provider; don't assume the database password is also the login password
+Recovery link goes to localhost:3000	Correct Supabase Authentication → URL Configuration Site URL and allowed redirects
+Recovery link says expired	Request a fresh link; avoid reopening an already expired/used token
+Auth email says “rate limit exceeded”	Supabase email-service limit reached; wait for the limit to clear or use a supported administrative recovery path
++1 returns 400 Bad Request	Check DevTools Network → increment_monthly_count → Response
+Error 42702: month_start is ambiguous	Older function version; use corrected ON CONFLICT ON CONSTRAINT monthly_counts_pkey and verify installed definition
+Counter changes but resets on refresh	Confirm Supabase RPC succeeded, correct user signed in, monthly_counts read works, and month selection is server-based
+History says “first month still in progress”	Expected while earliest saved month is still the active month
+A zero-only month is missing from initial history	Known v1.0 limitation: history start is inferred from earliest saved row
+Login works locally but not online	Check live URL, HTTPS, Supabase URL configuration, project URL/key, and console errors
+Git push rejected	Confirm GitHub login/permission, origin remote, branch main, and any remote changes
+
+
+13. Future development ideas (not in v1.0)
+- Explicit account tracking_start_month to guarantee History includes every zero-count month since tracking began.
+- Optional year filters or yearly summaries for long history lists.
+- CSV export available inside the signed-in History page.
+- Automated test suite for rollover and database permission regressions using an isolated test database.
+- Accessible animation intensity controls and reduced-motion static visuals.
+- Optional future custom domain if ever desired (not required for the free deployment).
+None of these additions is necessary for the current version to serve its primary purpose.
+14. Final project summary
+Monthly Mutt Counter is a lightweight, authenticated, increment-only tracker. The owner logs in, clicks +1 to record activity within the current calendar month, and returns at any time to see the saved number. When the calendar moves to a new month in Asia/Dhaka, the active display starts from zero while the previous month's result remains available in read-only History. GitHub Pages serves the website; Supabase stores the account and monthly records. The code is maintained locally in VS Code and published from the GitHub main branch.
+
+Live: https://anikard-ach.github.io/MonthlyMCounter-MMC/
+Repository: https://github.com/AnikARD-ACH/MonthlyMCounter-MMC
+Backend dashboard: https://supabase.com/dashboard/project/nfcwkpvfbqzwmhutozix
+Original local folder: D:\MonthlyMCounter-MMC
+Documentation prepared for MMC v1.0, November 2026. Update this README whenever code, deployment, Supabase configuration, or monthly-history behavior changes.
