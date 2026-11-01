@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Monthly Mutt Counter</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="water-effects.css">  
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+<script src="script.js" defer></script>
+<script src="water-effects.js" defer></script>
+</head>
+
+<body>
+
+  <!-- Animated background -->
+  <div id="bubbleField" aria-hidden="true"></div>
+  <div id="waterSplash" aria-hidden="true"></div>
+
+  <!-- Main website -->
+  <main class="container">
+
+    <h1>Monthly Mutt Counter</h1>
+
+    <!-- Login section -->
+    <section id="loginSection">
+      <p>Sign in to your monthly counter</p>
+
+      <input
+        id="emailInput"
+        type="email"
+        placeholder="Email address"
+        autocomplete="username"
+      >
+
+      <input
+        id="passwordInput"
+        type="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
+
+      <button id="loginBtn">Sign In</button>
+    </section>
+
+    <!-- Counter section -->
+    <section id="counterSection" hidden>
+
+      <p id="month">Loading month...</p>
+
+      <div class="counter" id="counter">0</div>
+
+      <button id="increaseBtn" disabled>
+        +1 Increase
+      </button>
+
+      <p class="note">Your monthly progress tracker</p>
+      <a href="history.html" class="back-link">
+  📅 View Monthly History
+</a>
+
+      <!-- Password is managed through Supabase Auth -->
+
+      <button id="logoutBtn">Sign Out</button>
+
+    </section>
+
+    <p id="status" role="status"></p>
+
+  </main>
+
+</body>
+</html>

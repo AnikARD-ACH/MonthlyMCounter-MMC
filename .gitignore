@@ -1,0 +1,12 @@
+# Temporary administrative scripts
+admin-setup/
+
+# Local environment files
+.env
+.env.*
+node_modules/
+
+# Editor and system files
+.vscode/
+.DS_Store
+Thumbs.db

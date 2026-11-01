@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Monthly History | Monthly Mutt Counter</title>
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="water-effects.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+
+  <!-- History logic will be added next -->
+  <script src="history.js" defer></script>
+
+  <!-- Shared water animation -->
+  <script src="water-effects.js" defer></script>
+</head>
+
+<body>
+  <!-- Same animation as every other page -->
+  <div id="bubbleField" aria-hidden="true"></div>
+  <div id="waterSplash" aria-hidden="true"></div>
+
+  <main class="container">
+
+    <h1>Monthly History</h1>
+    <p class="note">Your completed monthly records</p>
+
+    <!-- Authentication status -->
+    <p id="historyStatus" role="status">
+      Loading your history...
+    </p>
+
+    <!-- Read-only history -->
+    <section id="historySection" hidden>
+      <div id="historyList"></div>
+    </section>
+
+    <!-- Return to main counter -->
+    <a href="index.html" class="back-link">
+      ← Back to Counter
+    </a>
+
+  </main>
+</body>
+</html>
